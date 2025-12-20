@@ -7,8 +7,7 @@ import numpy as np
 import matplotlib.font_manager as fm
 
  #字体+图表样式配置simsun.ttc
-plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'Microsoft YaHei', 'Heiti TC']
-plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示为方框的问题
+
 plt.rcParams['font.size'] = 9
 plt.rcParams['axes.spines.top'] = False
 plt.rcParams['axes.spines.right'] = False
@@ -111,6 +110,8 @@ def introduce_page():
 
 def data_page():
     """当选择预测费用页面时，将呈现该函数的内容"""
+    plt.rcParams['font.sans-serif'] = ['SimHei', 'Noto Sans CJK SC', 'DejaVu Sans']  # 字体列表（优先使用前面的，缺失则 fallback 到后面的）
+    plt.rcParams['axes.unicode_minus'] = False
 
     # 专业列表的核心数据
     majors = ["网络安全", "人工智能", "信息系统", "大数据管理", "计算机科学", "软件工程"]
@@ -168,7 +169,7 @@ def data_page():
         ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), frameon=False)
         ax.set_xticks(x)
         # 额外保障：指定字体，避免X轴中文乱码
-        ax.set_xticklabels(majors, rotation=40, ha='right', fontproperties='WenQuanYi Zen Hei')
+        ax.set_xticklabels(majors, rotation=40, ha='right', fontproperties='SimHei')
         ax.set_ylabel("占比")
         ax.set_ylim(0, 1.0)
         plt.tight_layout()
@@ -192,7 +193,7 @@ def data_page():
         ax.legend(loc='upper right', frameon=False)
         ax.set_ylabel("分数")
         # 额外保障：指定字体，避免X轴中文乱码
-        ax.set_xticklabels(majors, rotation=40, ha='right', fontproperties='WenQuanYi Zen Hei')
+        ax.set_xticklabels(majors, rotation=40, ha='right', fontproperties='SimHei')
         ax.set_ylim(75, 95)
         st.pyplot(fig)
 
@@ -217,7 +218,7 @@ def data_page():
             ax.text(bar.get_x()+bar.get_width()/2, bar.get_height()+0.002,
                     f"{rate*100:.1f}%", ha='center', fontsize=8)
         # 额外保障：指定字体，避免X轴中文乱码
-        ax.set_xticklabels(majors, rotation=40, ha='right', fontproperties='WenQuanYi Zen Hei')
+        ax.set_xticklabels(majors, rotation=40, ha='right', fontproperties='SimHei')
         st.pyplot(fig)
 
     with col6:
@@ -243,7 +244,7 @@ def data_page():
         for i, val in enumerate(values):
             ax.text(i, val + 1, f"{val:.1f}", ha='center', fontsize=8)
         # 额外保障：指定字体，避免X轴中文乱码
-        ax.set_xticklabels(metrics, fontproperties='WenQuanYi Zen Hei')
+        ax.set_xticklabels(metrics, fontproperties='SimHei')
         st.pyplot(fig)
 
     with col8:
