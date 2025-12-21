@@ -6,8 +6,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.font_manager as fm
 
+# -------------  通用画图函数  -------------
+def get_chinese_font(size=9):
+    """返回一个一定能用的中文字体属性对象"""
+    # 如果系统缺 Noto，就退到 WenQuanYi，再缺就直接用系统黑体
+    for name in ['Noto Sans CJK SC',
+                 'WenQuanYi Micro Hei',
+                 'DejaVu Sans']:          # 最后保底
+        if name in [f.name for f in fm.fontManager.ttflist]:
+            return fm.FontProperties(fname=fm.findfont(name), size=size)
+    return None
+
+CHINESE_FONT =get_chinese_font()
+
  #字体+图表样式配置simsun.ttc
-plt.rcParams['font.family'] = ['SimHei', 'DejaVu Sans'] 
+plt.rcParams['font.family']= CHINESE_FONT
 plt.rcParams['axes.unicode_minus']= False
 plt.rcParams['font.size'] = 9
 plt.rcParams['axes.spines.top'] = False
@@ -165,10 +178,10 @@ def data_page():
         ax.bar(x - bar_width/2, male_ratio, bar_width, color='#4285F4', label='男性占比')
         ax.bar(x + bar_width/2, female_ratio, bar_width, color='#EA4335', label='女性占比')
         
-        ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), frameon=False)
+        ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), frameon=False, prop=CHINESE_FONT)
         ax.set_xticks(x)
-        ax.set_xticklabels(majors, rotation=40, ha='right')
-        ax.set_ylabel("占比")
+        ax.set_xticklabels(majors, rotation=40, ha='right',fontproperties=CHINESE_FONT)
+        ax.set_ylabel("占比",fontproperties=CHINESE_FONT)
         ax.set_ylim(0, 1.0)
         plt.tight_layout()
         st.pyplot(fig)
@@ -190,9 +203,9 @@ def data_page():
         ax.plot(majors, mid_scores, color='#FBBC05', marker='o', label='期中考试', linewidth=2)
         ax.plot(majors, final_scores, color='#34A853', marker='o', label='期末考试', linewidth=2)
         
-        ax.legend(loc='upper right', frameon=False)
-        ax.set_ylabel("分数")
-        ax.set_xticklabels(majors, rotation=40, ha='right')
+        ax.legend(loc='upper right', frameon=False,prop=CHINESE_FONT)
+        ax.set_ylabel("分数",fontproperties=CHINESE_FONT)
+        ax.set_xticklabels(majors, rotation=40, ha='right',fontproperties=CHINESE_FONT)
         ax.set_ylim(75, 95)
         st.pyplot(fig)
 
@@ -212,7 +225,7 @@ def data_page():
         colors = plt.cm.Blues(np.linspace(0.5, 0.9, len(majors)))
         bars = ax.bar(majors, attendance_rate, 0.6, color=colors)
         
-        ax.set_ylabel("出勤率")
+        ax.set_ylabel("出勤率",fontproperties=CHINESE_FONT)
         ax.set_ylim(0.85, 1.0)
         # 标注百分比
         for bar, rate in zip(bars, attendance_rate):
@@ -221,9 +234,10 @@ def data_page():
                 bar.get_height() + 0.002,
                 f"{rate*100:.1f}%", 
                 ha='center', 
-                fontsize=8
+                fontsize=8,
+                fontproperties=CHINESE_FONT
             )
-        ax.set_xticklabels(majors, rotation=40, ha='right')
+        ax.set_xticklabels(majors, rotation=40, ha='right',fontproperties=CHINESE_FONT)
         st.pyplot(fig)
 
     with col6:
@@ -246,11 +260,12 @@ def data_page():
         ax.plot(metrics, values, color=bigdata_solo["area_color"], linewidth=2, marker='o', markersize=4)
         ax.fill_between(metrics, values, color=bigdata_solo["area_color"], alpha=0.3)
         
-        ax.set_ylabel("数值")
+        ax.set_ylabel("数值",fontproperties=CHINESE_FONT)
         ax.set_ylim(0, 100)
         # 标注数值
         for i, val in enumerate(values):
-            ax.text(i, val + 1, f"{val:.1f}", ha='center', fontsize=8)
+            ax.text(i, val + 1, f"{val:.1f}", ha='center', fontsize=8,fontproperties=CHINESE_FONT)
+        ax.set_xticklabels(metrics, fontproperties=CHINESE_FONT)
         st.pyplot(fig)
 
     with col8:
