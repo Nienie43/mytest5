@@ -2,19 +2,11 @@
 import streamlit as st
 import pickle
 import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.font_manager as fm
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
-# ---------------------- 字体+图表样式配置 ----------------------
-plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'Microsoft YaHei']
-plt.rcParams['axes.unicode_minus'] = False
-plt.rcParams['font.size'] = 9
-plt.rcParams['axes.spines.top'] = False
-plt.rcParams['axes.spines.right'] = False
-plt.rcParams['axes.edgecolor'] = '#E0E0E0'
-plt.rcParams['xtick.color'] = '#666666'
-plt.rcParams['ytick.color'] = '#666666'
 
 #项目介绍页面
 
@@ -142,7 +134,7 @@ def data_page():
     # 页面标题
     st.title("📊专业数据分析报告")
 
-    # 各专业基础数据表格
+    # 各专业基础数据表格（完全不变）
     st.subheader("1. 各专业基础数据统计")
     table_data = {
         "专业名称": majors,
@@ -152,100 +144,206 @@ def data_page():
     }
     st.table(table_data)
 
-    # 各专业男女性别比例（双层柱状图）
+    # ---------------------- 1. 替代双层柱状图（性别比例） ----------------------
     st.subheader("2. 各专业男女性别比例")
     col1, col2 = st.columns([3, 1])
 
     with col1:
-        fig, ax = plt.subplots(figsize=(10, 4))
-        x = np.arange(len(majors))
-        bar_width = 0.5
-        # 双层并列柱状图
-        ax.bar(x - bar_width/2, male_ratio, bar_width, color='#4285F4', label='男性占比')
-        ax.bar(x + bar_width/2, female_ratio, bar_width, color='#EA4335', label='女性占比')
-
-        ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), frameon=False)
-        ax.set_xticks(x)
-        ax.set_xticklabels(majors, rotation=40, ha='right')
-        ax.set_ylabel("占比")
-        ax.set_ylim(0, 1.0)
-        plt.tight_layout()
-        st.pyplot(fig)
+        # 构建Plotly双层柱状图，还原原样式
+        fig1 = go.Figure()
+        # 添加男性占比柱形
+        fig1.add_trace(go.Bar(
+            x=majors,
+            y=male_ratio,
+            name='男性占比',
+            marker_color='#4285F4',
+            width=0.4
+        ))
+        # 添加女性占比柱形
+        fig1.add_trace(go.Bar(
+            x=majors,
+            y=female_ratio,
+            name='女性占比',
+            marker_color='#EA4335',
+            width=0.4
+        ))
+        # 配置样式，还原原Matplotlib样式
+        fig1.update_layout(
+            yaxis_title="占比",
+            yaxis_range=[0, 1.0],
+            legend=dict(
+                x=1.02,
+                y=1,
+                orientation="v",
+                bgcolor='rgba(0,0,0,0)'
+            ),
+            width=800,
+            height=320,
+            margin=dict(l=20, r=20, t=20, b=50),
+            barmode='group'
+        )
+        # X轴标签旋转
+        fig1.update_xaxes(tickangle=-40)
+        # Streamlit渲染
+        st.plotly_chart(fig1, use_container_width=True)
 
     with col2:
         st.write("性别比例明细")
-        st.table([[m, f"{mr*100:.1f}%", f"{fr*100:.1f}%"]
-                  for m, mr, fr in zip(majors, male_ratio, female_ratio)])
+        # 创建明细表格
+        gender_table = {
+            "专业": majors,
+            "男性占比": [f"{mr*100:.1f}%" for mr in male_ratio],
+            "女性占比": [f"{fr*100:.1f}%" for fr in female_ratio]
+        }
+        st.table(gender_table)
 
-    # 期中/期末分数对比（折线图）
+    # ---------------------- 2. 替代折线图（期中/期末分数） ----------------------
     st.subheader("3. 各专业期中&期末考试分数趋势")
     col3, col4 = st.columns([3, 1])
 
     with col3:
-        fig, ax = plt.subplots(figsize=(10, 3.5))
-        # 双折线图对比期中/期末分数
-        ax.plot(majors, mid_scores, color='#FBBC05', marker='o', label='期中考试', linewidth=2)
-        ax.plot(majors, final_scores, color='#34A853', marker='o', label='期末考试', linewidth=2)
-
-        ax.legend(loc='upper right', frameon=False)
-        ax.set_ylabel("分数")
-        ax.set_xticklabels(majors, rotation=40, ha='right')
-        ax.set_ylim(75, 95)
-        st.pyplot(fig)
+        # 构建Plotly双折线图，还原原样式
+        fig2 = go.Figure()
+        # 期中考试折线
+        fig2.add_trace(go.Scatter(
+            x=majors,
+            y=mid_scores,
+            name='期中考试',
+            mode='lines+markers',
+            line=dict(color='#FBBC05', width=2),
+            marker=dict(symbol='circle', size=6)
+        ))
+        # 期末考试折线
+        fig2.add_trace(go.Scatter(
+            x=majors,
+            y=final_scores,
+            name='期末考试',
+            mode='lines+markers',
+            line=dict(color='#34A853', width=2),
+            marker=dict(symbol='circle', size=6)
+        ))
+        # 配置样式
+        fig2.update_layout(
+            yaxis_title="分数",
+            yaxis_range=[75, 95],
+            legend=dict(
+                x=1.02,
+                y=1,
+                bgcolor='rgba(0,0,0,0)'
+            ),
+            width=800,
+            height=280,
+            margin=dict(l=20, r=20, t=20, b=50)
+        )
+        fig2.update_xaxes(tickangle=-40)
+        st.plotly_chart(fig2, use_container_width=True)
 
     with col4:
         st.write("分数明细")
-        st.table([[m, f"期中: {mid}", f"期末: {final}"]
-                  for m, mid, final in zip(majors, mid_scores, final_scores)])
+        # 创建分数明细表格
+        score_table = {
+            "专业": majors,
+            "期中": [f"{mid}" for mid in mid_scores],
+            "期末": [f"{final}" for final in final_scores]
+        }
+        st.table(score_table)
 
-    # 平均上课出勤率（单层柱状图）
+    # ---------------------- 3. 替代单层柱状图（出勤率） ----------------------
     st.subheader("4. 各专业平均上课出勤率")
     col5, col6 = st.columns([3, 1])
 
     with col5:
-        fig, ax = plt.subplots(figsize=(10, 3.5))
-        colors = plt.cm.Blues(np.linspace(0.5, 0.9, len(majors)))
-        bars = ax.bar(majors, attendance_rate, 0.6, color=colors)
-
-        ax.set_ylabel("出勤率")
-        ax.set_ylim(0.85, 1.0)
-        # 标注百分比
-        for bar, rate in zip(bars, attendance_rate):
-            ax.text(bar.get_x()+bar.get_width()/2, bar.get_height()+0.002,
-                    f"{rate*100:.1f}%", ha='center', fontsize=8)
-        ax.set_xticklabels(majors, rotation=40, ha='right')
-        st.pyplot(fig)
+        # 构建Plotly单层柱状图，使用渐变颜色
+        colors = ['#08306b', '#08519c', '#2171b5', '#4292c6', '#6baed6', '#9ecae1']  # 蓝色渐变
+        fig3 = go.Figure()
+        fig3.add_trace(go.Bar(
+            x=majors,
+            y=attendance_rate,
+            marker_color=colors,
+            width=0.5
+        ))
+        
+        # 添加百分比标注
+        for i, (m, rate) in enumerate(zip(majors, attendance_rate)):
+            fig3.add_annotation(
+                x=m,
+                y=rate + 0.002,
+                text=f"{rate*100:.1f}%",
+                font_size=10,
+                showarrow=False,
+                xanchor='center'
+            )
+        # 配置样式
+        fig3.update_layout(
+            yaxis_title="出勤率",
+            yaxis_range=[0.85, 1.0],
+            width=800,
+            height=280,
+            margin=dict(l=20, r=20, t=20, b=50),
+            showlegend=False
+        )
+        fig3.update_xaxes(tickangle=-40)
+        st.plotly_chart(fig3, use_container_width=True)
 
     with col6:
         st.write("出勤率明细")
-        st.table([[m, f"{r*100:.1f}%"] for m, r in zip(majors, attendance_rate)])
+        # 创建出勤率明细表格
+        attendance_table = {
+            "专业": majors,
+            "出勤率": [f"{r*100:.1f}%" for r in attendance_rate]
+        }
+        st.table(attendance_table)
 
-    # 大数据管理专业核心指标（面积图）
+    # ---------------------- 4. 替代面积图（大数据专业指标） ----------------------
     st.subheader("5. 大数据管理专业核心指标")
     col7, col8 = st.columns([3, 1])
 
     with col7:
-        fig, ax = plt.subplots(figsize=(10, 3))
-        # 面积图展示大数据出勤率+期末分数
         metrics = ["平均上课出勤率", "期末考试平均分"]
         values = [bigdata_solo["平均上课出勤率"]*100, bigdata_solo["期末考试平均分"]]
-
-        ax.plot(metrics, values, color=bigdata_solo["area_color"], linewidth=2, marker='o', markersize=4)
-        ax.fill_between(metrics, values, color=bigdata_solo["area_color"], alpha=0.3)
-
-        ax.set_ylabel("数值")
-        ax.set_ylim(0, 100)
-        # 标注数值
+        # 构建Plotly面积图
+        fig4 = go.Figure()
+        # 面积图+折线图
+        fig4.add_trace(go.Scatter(
+            x=metrics,
+            y=values,
+            mode='lines+markers',
+            line=dict(color=bigdata_solo["area_color"], width=2),
+            marker=dict(symbol='circle', size=8, color=bigdata_solo["area_color"]),
+            fill='tozeroy',
+            fillcolor=f"rgba(66, 133, 244, 0.2)"  # 使用rgba设置透明度
+        ))
+        # 添加数值标注
         for i, val in enumerate(values):
-            ax.text(i, val + 1, f"{val:.1f}", ha='center', fontsize=8)
-        st.pyplot(fig)
+            fig4.add_annotation(
+                x=metrics[i],
+                y=val + 1,
+                text=f"{val:.1f}",
+                font_size=10,
+                showarrow=False,
+                xanchor='center'
+            )
+        # 配置样式
+        fig4.update_layout(
+            yaxis_title="数值",
+            yaxis_range=[80, 95],
+            width=800,
+            height=240,
+            margin=dict(l=20, r=20, t=20, b=20),
+            showlegend=False
+        )
+        st.plotly_chart(fig4, use_container_width=True)
 
     with col8:
         st.write("指标明细")
-        st.table([
-            ["平均上课出勤率", f"{bigdata_solo['平均上课出勤率']*100:.1f}%"],
-            ["期末考试平均分", bigdata_solo["期末考试平均分"]]
-        ])
+        # 创建指标明细表格
+        metrics_table = {
+            "指标": ["平均上课出勤率", "期末考试平均分"],
+            "数值": [f"{bigdata_solo['平均上课出勤率']*100:.1f}%", f"{bigdata_solo['期末考试平均分']:.1f}"]
+        }
+        st.table(metrics_table)
+
+    
 
 #成绩预测页面
 
