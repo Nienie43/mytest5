@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.font_manager as fm
 
  #字体+图表样式配置simsun.ttc
-plt.rcParams['font.family']      = 'Noto Sans CJK SC'   # 思源黑体
+plt.rcParams['font.family'] = ['SimHei', 'DejaVu Sans'] 
 plt.rcParams['axes.unicode_minus']= False
 plt.rcParams['font.size'] = 9
 plt.rcParams['axes.spines.top'] = False
