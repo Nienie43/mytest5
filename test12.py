@@ -7,14 +7,14 @@ import numpy as np
 import matplotlib.font_manager as fm
 
  #字体+图表样式配置simsun.ttc
-
+plt.rcParams['font.family']      = 'Noto Sans CJK SC'   # 思源黑体
+plt.rcParams['axes.unicode_minus']= False
 plt.rcParams['font.size'] = 9
 plt.rcParams['axes.spines.top'] = False
 plt.rcParams['axes.spines.right'] = False
 plt.rcParams['axes.edgecolor'] = '#E0E0E0'
 plt.rcParams['xtick.color'] = '#666666'
 plt.rcParams['ytick.color'] = '#666666'
-
 
 #项目介绍页面
 
@@ -110,146 +110,155 @@ def introduce_page():
 
 def data_page():
     """当选择预测费用页面时，将呈现该函数的内容"""
-    # 专业列表的核心数据
+
+    #专业列表的核心数据
+    
     majors = ["网络安全", "人工智能", "信息系统", "大数据管理", "计算机科学", "软件工程"]
 
-    # 1. 表格数据
+    # 表格数据：每周平均学时、期中/期末平均分
     study_data = {
         "每周平均学时": [19.5, 20.2, 18.0, 21.8, 19.0, 18.8],
         "期中考试平均分": [82.5, 84.5, 78.0, 86.8, 81.0, 80.2],
         "期末考试平均分": [85.0, 88.0, 81.5, 90.2, 84.0, 83.5]
     }
-    # 2. 性别比例
+
+    #性别比例（双层柱状图）
     male_ratio = [0.68, 0.70, 0.72, 0.52, 0.63, 0.65]
     female_ratio = [1 - r for r in male_ratio]
-    # 3. 期中/期末分数
+
+    #期中/期末分数（折线图）（复用study_data数据）
     mid_scores = study_data["期中考试平均分"]
     final_scores = study_data["期末考试平均分"]
-    # 4. 出勤率
+
+    #平均上课出勤率（单层柱状图）
     attendance_rate = [0.92, 0.93, 0.88, 0.95, 0.91, 0.90]
-    # 5. 大数据单独数据
+
+    #大数据专业单独数据
     bigdata_solo = {
-        "平均上课出勤率": 0.95,
-        "期末考试平均分": 90.2,
-        "area_color": '#4285F4'
+        "平均上课出勤率": 0.95,          
+        "期末考试平均分": 90.2,         
+        "area_color": '#4285F4'       
     }
 
-    # ---------------------- 页面标题 ----------------------
+    #页面标题
     st.title("📊专业数据分析报告")
 
-    # ---------------------- 1. 基础数据表格（原生组件，无乱码） ----------------------
+    #各专业基础数据表格
     st.subheader("1. 各专业基础数据统计")
-    table_data = []
-    for i in range(len(majors)):
-        table_data.append({
-            "专业名称": majors[i],
-            "每周平均学时": f"{study_data['每周平均学时'][i]}h",
-            "期中考试平均分": study_data["期中考试平均分"][i],
-            "期末考试平均分": study_data["期末考试平均分"][i]
-        })
-    st.dataframe(table_data, use_container_width=True)
+    table_data = {
+        "专业名称": majors,
+        "每周平均学时": [f"{h}h" for h in study_data["每周平均学时"]],
+        "期中考试平均分": study_data["期中考试平均分"],
+        "期末考试平均分": study_data["期末考试平均分"]
+    }
+    st.table(table_data)
 
-    # ---------------------- 2. 性别比例（Streamlit 原生柱状图，无乱码） ----------------------
+    #各专业男女性别比例（双层柱状图）
     st.subheader("2. 各专业男女性别比例")
     col1, col2 = st.columns([3, 1])
+
     with col1:
-        # 原生柱状图，x轴直接用中文列表，无乱码
-        st.bar_chart(
-            data={
-                "男性占比": male_ratio,
-                "女性占比": female_ratio
-            },
-            x_label="专业名称",
-            y_label="占比",
-            width=0,
-            height=300
-        )
-        # 手动标注x轴中文（原生图表自动适配中文）
-        st.caption("专业：" + " | ".join(majors))
+        fig, ax = plt.subplots(figsize=(10, 4))
+        x = np.arange(len(majors))
+        bar_width = 0.5
+        # 双层并列柱状图
+        ax.bar(x - bar_width/2, male_ratio, bar_width, color='#4285F4', label='男性占比')
+        ax.bar(x + bar_width/2, female_ratio, bar_width, color='#EA4335', label='女性占比')
+        
+        ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), frameon=False)
+        ax.set_xticks(x)
+        ax.set_xticklabels(majors, rotation=40, ha='right')
+        ax.set_ylabel("占比")
+        ax.set_ylim(0, 1.0)
+        plt.tight_layout()
+        st.pyplot(fig)
+
     with col2:
         st.write("性别比例明细")
-        ratio_table = []
-        for m, mr, fr in zip(majors, male_ratio, female_ratio):
-            ratio_table.append({
-                "专业": m,
-                "男性占比": f"{mr*100:.1f}%",
-                "女性占比": f"{fr*100:.1f}%"
-            })
-        st.dataframe(ratio_table, use_container_width=True)
+        st.table([
+            [m, f"{mr*100:.1f}%", f"{fr*100:.1f}%"] 
+            for m, mr, fr in zip(majors, male_ratio, female_ratio)
+        ])
 
-    # ---------------------- 3. 期中/期末分数（原生折线图，无乱码） ----------------------
+    #期中/期末分数对比（折线图）
     st.subheader("3. 各专业期中&期末考试分数趋势")
     col3, col4 = st.columns([3, 1])
+
     with col3:
-        st.line_chart(
-            data={
-                "期中考试": mid_scores,
-                "期末考试": final_scores
-            },
-            x_label="专业名称",
-            y_label="分数",
-            width=0,
-            height=250
-        )
-        st.caption("专业：" + " | ".join(majors))
+        fig, ax = plt.subplots(figsize=(10, 3.5))
+        # 双折线图对比期中/期末分数
+        ax.plot(majors, mid_scores, color='#FBBC05', marker='o', label='期中考试', linewidth=2)
+        ax.plot(majors, final_scores, color='#34A853', marker='o', label='期末考试', linewidth=2)
+        
+        ax.legend(loc='upper right', frameon=False)
+        ax.set_ylabel("分数")
+        ax.set_xticklabels(majors, rotation=40, ha='right')
+        ax.set_ylim(75, 95)
+        st.pyplot(fig)
+
     with col4:
         st.write("分数明细")
-        score_table = []
-        for m, mid, final in zip(majors, mid_scores, final_scores):
-            score_table.append({
-                "专业": m,
-                "期中考试": mid,
-                "期末考试": final
-            })
-        st.dataframe(score_table, use_container_width=True)
+        st.table([
+            [m, f"期中: {mid}", f"期末: {final}"] 
+            for m, mid, final in zip(majors, mid_scores, final_scores)
+        ])
 
-    # ---------------------- 4. 出勤率（原生柱状图，无乱码） ----------------------
+    #平均上课出勤率（单层柱状图）
     st.subheader("4. 各专业平均上课出勤率")
     col5, col6 = st.columns([3, 1])
+
     with col5:
-        st.bar_chart(
-            data={
-                "平均出勤率": attendance_rate
-            },
-            x_label="专业名称",
-            y_label="出勤率",
-            width=0,
-            height=250
-        )
-        st.caption("专业：" + " | ".join(majors))
+        fig, ax = plt.subplots(figsize=(10, 3.5))
+        colors = plt.cm.Blues(np.linspace(0.5, 0.9, len(majors)))
+        bars = ax.bar(majors, attendance_rate, 0.6, color=colors)
+        
+        ax.set_ylabel("出勤率")
+        ax.set_ylim(0.85, 1.0)
+        # 标注百分比
+        for bar, rate in zip(bars, attendance_rate):
+            ax.text(
+                bar.get_x() + bar.get_width()/2, 
+                bar.get_height() + 0.002,
+                f"{rate*100:.1f}%", 
+                ha='center', 
+                fontsize=8
+            )
+        ax.set_xticklabels(majors, rotation=40, ha='right')
+        st.pyplot(fig)
+
     with col6:
         st.write("出勤率明细")
-        att_table = []
-        for m, r in zip(majors, attendance_rate):
-            att_table.append({
-                "专业": m,
-                "出勤率": f"{r*100:.1f}%"
-            })
-        st.dataframe(att_table, use_container_width=True)
+        st.table([
+            [m, f"{r*100:.1f}%"] 
+            for m, r in zip(majors, attendance_rate)
+        ])
 
-    # ---------------------- 5. 大数据专业指标（原生面积图，无乱码） ----------------------
+    #大数据管理专业核心指标（面积图）
     st.subheader("5. 大数据管理专业核心指标")
     col7, col8 = st.columns([3, 1])
+
     with col7:
-        st.area_chart(
-            data={
-                "核心指标数值": [bigdata_solo["平均上课出勤率"]*100, bigdata_solo["期末考试平均分"]]
-            },
-            x_label="指标名称",
-            y_label="数值",
-            width=0,
-            height=200
-        )
-        st.caption("指标：平均上课出勤率 | 期末考试平均分")
+        fig, ax = plt.subplots(figsize=(10, 3))
+        # 面积图展示大数据出勤率+期末分数
+        metrics = ["平均上课出勤率", "期末考试平均分"]
+        values = [bigdata_solo["平均上课出勤率"]*100, bigdata_solo["期末考试平均分"]]
+        
+        ax.plot(metrics, values, color=bigdata_solo["area_color"], linewidth=2, marker='o', markersize=4)
+        ax.fill_between(metrics, values, color=bigdata_solo["area_color"], alpha=0.3)
+        
+        ax.set_ylabel("数值")
+        ax.set_ylim(0, 100)
+        # 标注数值
+        for i, val in enumerate(values):
+            ax.text(i, val + 1, f"{val:.1f}", ha='center', fontsize=8)
+        st.pyplot(fig)
+
     with col8:
         st.write("指标明细")
-        bigdata_table = [
-            {"指标": "平均上课出勤率", "数值": f"{bigdata_solo['平均上课出勤率']*100:.1f}%"},
-            {"指标": "期末考试平均分", "数值": bigdata_solo["期末考试平均分"]}
-        ]
-        st.dataframe(bigdata_table, use_container_width=True)
-
-
+        st.table([
+            ["平均上课出勤率", f"{bigdata_solo['平均上课出勤率']*100:.1f}%"],
+            ["期末考试平均分", bigdata_solo["期末考试平均分"]]
+        ])
 
 #成绩预测页面
 
