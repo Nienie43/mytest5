@@ -17,10 +17,8 @@ def get_chinese_font(size=9):
             return fm.FontProperties(fname=fm.findfont(name), size=size)
     return None
 
-for font_name in ['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']:
-    if font_name in [f.name for f in fm.fontManager.ttflist]:
-        plt.rcParams['font.family'] = font_name
-        break
+
+CHINESE_FONT = get_chinese_font() 
 plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 9
 plt.rcParams['axes.spines.top'] = False
