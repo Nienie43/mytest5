@@ -17,11 +17,11 @@ def get_chinese_font(size=9):
             return fm.FontProperties(fname=fm.findfont(name), size=size)
     return None
 
-CHINESE_FONT =get_chinese_font()
-
- #字体+图表样式配置simsun.ttc
-plt.rcParams['font.family']= CHINESE_FONT
-plt.rcParams['axes.unicode_minus']= False
+for font_name in ['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']:
+    if font_name in [f.name for f in fm.fontManager.ttflist]:
+        plt.rcParams['font.family'] = font_name
+        break
+plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 9
 plt.rcParams['axes.spines.top'] = False
 plt.rcParams['axes.spines.right'] = False
