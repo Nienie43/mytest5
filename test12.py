@@ -426,7 +426,7 @@ def predict_page():
             else:
                 st.success(advice)
 
-            st.image(f"images/{score_level}.png", width=1000)
+            st.image(f"images/{score_level}.png", width=500)
 
     if not submitted:
         st.subheader("📊 预测结果")
