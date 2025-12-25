@@ -117,7 +117,7 @@ def data_page():
     male_ratio = [0.68, 0.70, 0.72, 0.52, 0.63, 0.65]
     female_ratio = [1 - r for r in male_ratio]
 
-    # 期中/期末分数（折线图）（复用study_data数据）
+    # 期中/期末分数（折线图）
     mid_scores = study_data["期中考试平均分"]
     final_scores = study_data["期末考试平均分"]
 
@@ -134,7 +134,7 @@ def data_page():
     # 页面标题
     st.title("📊专业数据分析报告")
 
-    # 各专业基础数据表格（完全不变）
+    # 1.各专业基础数据表格
     st.subheader("1. 各专业基础数据统计")
     table_data = {
         "专业名称": majors,
@@ -144,12 +144,12 @@ def data_page():
     }
     st.table(table_data)
 
-    # ---------------------- 1. 替代双层柱状图（性别比例） ----------------------
+    #2.性别比例
     st.subheader("2. 各专业男女性别比例")
     col1, col2 = st.columns([3, 1])
 
     with col1:
-        # 构建Plotly双层柱状图，还原原样式
+        # 构建Plotly双层柱状图
         fig1 = go.Figure()
         # 添加男性占比柱形
         fig1.add_trace(go.Bar(
@@ -167,7 +167,7 @@ def data_page():
             marker_color='#EA4335',
             width=0.4
         ))
-        # 配置样式，还原原Matplotlib样式
+        # 配置样式
         fig1.update_layout(
             yaxis_title="占比",
             yaxis_range=[0, 1.0],
@@ -197,12 +197,12 @@ def data_page():
         }
         st.table(gender_table)
 
-    # ---------------------- 2. 替代折线图（期中/期末分数） ----------------------
+    # 3.折线图（期中/期末分数）
     st.subheader("3. 各专业期中&期末考试分数趋势")
     col3, col4 = st.columns([3, 1])
 
     with col3:
-        # 构建Plotly双折线图，还原原样式
+        # 构建双折线图
         fig2 = go.Figure()
         # 期中考试折线
         fig2.add_trace(go.Scatter(
@@ -248,12 +248,12 @@ def data_page():
         }
         st.table(score_table)
 
-    # ---------------------- 3. 替代单层柱状图（出勤率） ----------------------
+    # 4.单层柱状图（出勤率）
     st.subheader("4. 各专业平均上课出勤率")
     col5, col6 = st.columns([3, 1])
 
     with col5:
-        # 构建Plotly单层柱状图，使用渐变颜色
+        # 构建单层柱状图
         colors = ['#08306b', '#08519c', '#2171b5', '#4292c6', '#6baed6', '#9ecae1']  # 蓝色渐变
         fig3 = go.Figure()
         fig3.add_trace(go.Bar(
@@ -294,14 +294,14 @@ def data_page():
         }
         st.table(attendance_table)
 
-    # ---------------------- 4. 替代面积图（大数据专业指标） ----------------------
+    #5.面积图（大数据专业指标）
     st.subheader("5. 大数据管理专业核心指标")
     col7, col8 = st.columns([3, 1])
 
     with col7:
         metrics = ["平均上课出勤率", "期末考试平均分"]
         values = [bigdata_solo["平均上课出勤率"]*100, bigdata_solo["期末考试平均分"]]
-        # 构建Plotly面积图
+        # 构建面积图
         fig4 = go.Figure()
         # 面积图+折线图
         fig4.add_trace(go.Scatter(
@@ -311,7 +311,7 @@ def data_page():
             line=dict(color=bigdata_solo["area_color"], width=2),
             marker=dict(symbol='circle', size=8, color=bigdata_solo["area_color"]),
             fill='tozeroy',
-            fillcolor=f"rgba(66, 133, 244, 0.2)"  # 使用rgba设置透明度
+            fillcolor=f"rgba(66, 133, 244, 0.2)"  
         ))
         # 添加数值标注
         for i, val in enumerate(values):
@@ -384,7 +384,7 @@ def predict_page():
             major_ai = 1
 
         sex_female, sex_male = 0, 0
-        # 根据用户输入的性别数据更改对应的值（修正：与下拉框选项匹配）
+        # 根据用户输入的性别数据更改对应的值
         if sex == '女':
             sex_female = 1
         elif sex == '男':
